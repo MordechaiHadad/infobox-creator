@@ -6,3 +6,24 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+.infobox {
+    display: grid;
+    place-items: center;
+}
+
+.infobox img {
+    width: 50%;
+}
+
+.infobox h2 {
+    background-color: #606BBE;
+    width: 50%;
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    text-align: center;
+    padding: 0.5rem;
+    margin: 0;
+    font-family: ui-sans-serif,
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Microsoft YaHei Light", sans-serif;
+}
