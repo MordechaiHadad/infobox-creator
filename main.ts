@@ -3,8 +3,12 @@ import { parse } from "@iarna/toml";
 
 export default class InfoboxPlugin extends Plugin {
 	async onload() {
-		new Notice("Hello there sister");
+		console.log("Loading obsidian-infobox");
 		this.registerMarkdownPostProcessor(this.processInfoboxes.bind(this));
+	}
+
+	async unload() {
+		console.log("Unloading obsidian-infobox, bye bye!");
 	}
 
 	async processInfoboxes(el: HTMLElement, ctx: MarkdownPostProcessorContext) {
@@ -100,11 +104,24 @@ export default class InfoboxPlugin extends Plugin {
 					listDiv.classList.add("listdiv");
 					subDiv.appendChild(listDiv);
 
-					list.forEach(element => {
+					list.forEach((element) => {
 						const subContnet = document.createElement("p");
 						subContnet.textContent = element;
 						listDiv.appendChild(subContnet);
 					});
+				} else if (typeof content[key] == "object") {
+					if ("link" in content[key]) {
+						const subKey = document.createElement("p");
+						subKey.textContent = this.snakeCaseToNormal(key);
+						subKey.style.fontWeight = "700";
+						subDiv.appendChild(subKey);
+
+						const subContnet = document.createElement("a");
+						subContnet.textContent = content[key].content;
+						subContnet.href = content[key].link;
+						subContnet.style.width = "50%";
+						subDiv.appendChild(subContnet);
+					}
 				}
 			}
 		}
