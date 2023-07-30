@@ -17,13 +17,13 @@ export default class InfoboxPlugin extends Plugin {
 			(codeElement: HTMLElement) => {
 				if (codeElement.textContent !== null) {
 					const infoboxContent = this.parseInfoboxContent(
-						codeElement.textContent
+						codeElement.textContent,
 					);
 					const infoboxElement =
 						this.createInfoboxElement(infoboxContent);
 					codeElement.replaceWith(infoboxElement);
 				}
-			}
+			},
 		);
 	}
 
@@ -62,7 +62,7 @@ export default class InfoboxPlugin extends Plugin {
 		}
 
 		let remainingKeys = Object.keys(content).filter(
-			(key) => key !== "image" && key !== "title"
+			(key) => key !== "image" && key !== "title",
 		);
 
 		if (remainingKeys.length === 0) {
