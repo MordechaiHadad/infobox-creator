@@ -31,7 +31,13 @@ If your plugin does not need CSS, delete this file.
 .infobox-content {
     display: flex;
     width: 50%;
-    background-color: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.6);
+    border-color: hsla(var(--accent-h), var(--accent-s), var(--accent-l), 0.5);
+    border-bottom-width: 2px;
+    border-right-width: 2px;
+    border-left-width: 2px;
+    border-bottom-style: solid;
+    border-right-style: solid;
+    border-left-style: solid;
     flex-direction: column;
     gap: 1rem;
     padding: 0.75rem;
