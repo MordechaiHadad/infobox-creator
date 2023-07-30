@@ -61,7 +61,11 @@ export default class InfoboxPlugin extends Plugin {
 			div.appendChild(title);
 		}
 
-		if (Object.keys(content).length <= 2) {
+		let remainingKeys = Object.keys(content).filter(
+			(key) => key !== "image" && key !== "title"
+		);
+
+		if (remainingKeys.length === 0) {
 			return div;
 		}
 
