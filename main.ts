@@ -15,7 +15,6 @@ export default class InfoboxPlugin extends Plugin {
 		// Find all code blocks with 'infobox' language
 		el.querySelectorAll("pre > code.language-infobox").forEach(
 			(codeElement: HTMLElement) => {
-				// Parse the infobox content
 				if (codeElement.textContent !== null) {
 					const infoboxContent = this.parseInfoboxContent(
 						codeElement.textContent
@@ -44,8 +43,6 @@ export default class InfoboxPlugin extends Plugin {
 
 	parseInfoboxContent(content: string) {
 		return parse(content);
-		// Assuming the content is a JSON object
-		return JSON.parse(content);
 	}
 
 	createInfoboxElement(content: any) {
@@ -71,7 +68,6 @@ export default class InfoboxPlugin extends Plugin {
 		const infoboxContent = document.createElement("div");
 		infoboxContent.classList.add("infobox-content");
 		div.appendChild(infoboxContent);
-
 		for (const key in content) {
 			// Skip if the property is 'img' or 'title'
 			if (key === "image" || key === "title") continue;
@@ -118,7 +114,8 @@ export default class InfoboxPlugin extends Plugin {
 
 						const subContnet = document.createElement("a");
 						subContnet.textContent = content[key].content;
-						subContnet.href = content[key].link;
+						let url = this.parseUrl(content[key].link);
+						subContnet.href = url;
 						subContnet.style.width = "50%";
 						subDiv.appendChild(subContnet);
 					}
@@ -127,5 +124,33 @@ export default class InfoboxPlugin extends Plugin {
 		}
 
 		return div;
+	}
+
+	parseUrl(link: string): string {
+		if (!/\[\[(.*?)(\|(.*?))?\]\]/.test(link)) {
+			return link;
+		}
+
+		let matches = link.match(/\[\[(.*?)(\|(.*?))?\]\]/);
+		let noteName = matches![1];
+
+		if (noteName.indexOf("/") === -1) {
+			let files = this.app.vault.getMarkdownFiles();
+
+			for (let file of files) {
+				if (file.basename === noteName) {
+					noteName = file.path.replace(new RegExp("/", "g"), "%2F");
+					break;
+				}
+			}
+		} else {
+			noteName = noteName.replace(new RegExp("/", "g"), "%2F");
+		}
+
+		noteName = noteName.replace(new RegExp(" ", "g"), "%20");
+
+		let vaultName = this.app.vault.getName();
+
+		return `obsidian://open?vault=${vaultName}&file=${noteName}`;
 	}
 }
