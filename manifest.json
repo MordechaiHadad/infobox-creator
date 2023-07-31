@@ -3,9 +3,12 @@
 	"name": "Infobox Plugin",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "This is a sample plugin for Obsidian. This plugin demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "A TOML based plugin for generating infoboxes.",
+	"author": "Mordechai Hadad",
+	"authorUrl": "https://github.com/MordechaiHadad",
+	"fundingUrl": {
+		"Buy Me a Coffee": "https://www.buymeacoffee.com/mordechaihR",
+		"GitHub Sponsor": "https://github.com/sponsors/MordechaiHadad"
+	},
 	"isDesktopOnly": false
 }
