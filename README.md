@@ -2,6 +2,10 @@
 
 Obsidian Infobox is a TOML based infobox creator plugin for Obsidian. This plugin allows you to enhance your notes by adding infoboxes with an easy-to-understand syntax.
 
+## Showcase
+
+![image](https://github.com/MordechaiHadad/obsidian-infobox/assets/33547558/a152bec4-f803-4a6e-9292-100744cbd64b)
+
 ## Installation
 
 You can install the Obsidian Infobox plugin via Obsidian’s third-party plugin community. Here's how:
@@ -16,9 +20,9 @@ You can install the Obsidian Infobox plugin via Obsidian’s third-party plugin 
 
 With Obsidian Infobox, you can generate infoboxes within your notes. The syntax is simple and easy to adopt.
 
-```toml 
-title = "Your title here" 
-image = "https://your-image.com" 
+```toml
+title = "Your title here"
+image = "https://your-image.com"
 field_name = "your field content here"
 ```
 
@@ -29,15 +33,17 @@ field_name = "your field content here"
 This is the infobox title. Accepts a string.
 
 Example:
+
 ```toml
 title = "This is an Infobox"
 ```
 
 #### `image` (string)
 
-The image for the infobox. Accepts http or https links. 
+The image for the infobox. Accepts http or https links.
 
 Example:
+
 ```toml
 image = "https://example.com/image.png"
 ```
@@ -46,20 +52,19 @@ image = "https://example.com/image.png"
 
 Any other property not named `title` or `image` will be treated as an infobox field.
 
-- Basic field: 
+-   Basic field:
 
 ```toml
 property_name = "A basic string"
 ```
 
- 
-- Field with an array of strings: 
+-   Field with an array of strings:
 
 ```toml
 property_name = ["String1", "String2", "String3"]
 ```
- 
-- Field with a link associated with the text: 
+
+-   Field with a link associated with the text:
 
 ```toml
 property_name = {content = "Your content here", link = "https://your-link.com"}
