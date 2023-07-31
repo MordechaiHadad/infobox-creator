@@ -1,6 +1,6 @@
 {
 	"id": "obsidian-infobox",
-	"name": "Obsidian Infobox",
+	"name": "Obsidian Infobox!",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
 	"description": "A TOML based plugin for generating infoboxes.",
