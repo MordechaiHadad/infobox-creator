@@ -1,4 +1,4 @@
-# Obsidian Infobox
+# Infobox Creator
 
 Obsidian Infobox is a TOML based infobox creator plugin for Obsidian. This plugin allows you to enhance your notes by adding infoboxes with an easy-to-understand syntax.
 
