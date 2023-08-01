@@ -11,7 +11,7 @@ export default class InfoboxPlugin extends Plugin {
 		console.log("Loading infobox-creator");
 		this.registerMarkdownCodeBlockProcessor(
 			"infobox",
-			this.processInfoboxes.bind(this)
+			this.processInfoboxes.bind(this),
 		);
 	}
 
@@ -22,7 +22,7 @@ export default class InfoboxPlugin extends Plugin {
 	processInfoboxes(
 		source: string,
 		el: HTMLElement,
-		ctx: MarkdownPostProcessorContext
+		ctx: MarkdownPostProcessorContext,
 	) {
 		const infoboxContent = this.parseInfoboxContent(source);
 		const infoboxElement = this.createInfoboxElement(infoboxContent, ctx);
@@ -64,7 +64,7 @@ export default class InfoboxPlugin extends Plugin {
 		}
 
 		let remainingKeys = Object.keys(content).filter(
-			(key) => key !== "image" && key !== "title"
+			(key) => key !== "image" && key !== "title",
 		);
 
 		if (remainingKeys.length === 0) {
@@ -122,7 +122,7 @@ export default class InfoboxPlugin extends Plugin {
 						subContnet.textContent = content[key].content;
 						let url = this.parseUrl(
 							content[key].link,
-							ctx.sourcePath
+							ctx.sourcePath,
 						);
 						subContnet.href = url.url;
 						if (url.type === "internal") {
@@ -148,7 +148,7 @@ export default class InfoboxPlugin extends Plugin {
 
 		let file = this.app.metadataCache.getFirstLinkpathDest(
 			linkpath,
-			sourcePath
+			sourcePath,
 		);
 
 		let parsedurl: parsedUrl = { type: "internal", url: file!.path };
