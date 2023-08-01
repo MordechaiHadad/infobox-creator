@@ -1,4 +1,4 @@
-# Obsidian Infobox
+# Infobox Creator
 
 Obsidian Infobox is a TOML based infobox creator plugin for Obsidian. This plugin allows you to enhance your notes by adding infoboxes with an easy-to-understand syntax.
 
@@ -13,7 +13,7 @@ You can install the Obsidian Infobox plugin via Obsidian’s third-party plugin 
 1. Open Obsidian.
 2. Go to `Settings > Third-party plugins`.
 3. Make sure `Safe mode` is turned off.
-4. Click `Browse`, then search for `Obsidian Infobox`.
+4. Click `Browse`, then search for `Infobox Creator`.
 5. Click `Install`, then `Enable`.
 
 ## Usage
