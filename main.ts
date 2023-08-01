@@ -1,30 +1,32 @@
-import { Plugin, MarkdownPostProcessorContext, Notice } from "obsidian";
+import { Plugin, MarkdownPostProcessorContext, MetadataCache } from "obsidian";
 import { parse } from "@iarna/toml";
+
+interface parsedUrl {
+	type: "internal" | "external";
+	url: string;
+}
 
 export default class InfoboxPlugin extends Plugin {
 	async onload() {
-		console.log("Loading obsidian-infobox");
-		this.registerMarkdownPostProcessor(this.processInfoboxes.bind(this));
+		console.log("Loading infobox-creator");
+		this.registerMarkdownCodeBlockProcessor(
+			"infobox",
+			this.processInfoboxes.bind(this)
+		);
 	}
 
 	async unload() {
-		console.log("Unloading obsidian-infobox, bye bye!");
+		console.log("Unloading infobox-creator, bye bye!");
 	}
 
-	async processInfoboxes(el: HTMLElement, ctx: MarkdownPostProcessorContext) {
-		// Find all code blocks with 'infobox' language
-		el.querySelectorAll("pre > code.language-infobox").forEach(
-			(codeElement: HTMLElement) => {
-				if (codeElement.textContent !== null) {
-					const infoboxContent = this.parseInfoboxContent(
-						codeElement.textContent,
-					);
-					const infoboxElement =
-						this.createInfoboxElement(infoboxContent);
-					codeElement.replaceWith(infoboxElement);
-				}
-			},
-		);
+	async processInfoboxes(
+		source: string,
+		el: HTMLElement,
+		ctx: MarkdownPostProcessorContext
+	) {
+		const infoboxContent = this.parseInfoboxContent(source);
+		const infoboxElement = this.createInfoboxElement(infoboxContent, ctx);
+		el.replaceWith(infoboxElement);
 	}
 
 	snakeCaseToNormal(content: string) {
@@ -45,7 +47,7 @@ export default class InfoboxPlugin extends Plugin {
 		return parse(content);
 	}
 
-	createInfoboxElement(content: any) {
+	createInfoboxElement(content: any, ctx: MarkdownPostProcessorContext) {
 		const div = document.createElement("div");
 		div.classList.add("infobox");
 
@@ -62,7 +64,7 @@ export default class InfoboxPlugin extends Plugin {
 		}
 
 		let remainingKeys = Object.keys(content).filter(
-			(key) => key !== "image" && key !== "title",
+			(key) => key !== "image" && key !== "title"
 		);
 
 		if (remainingKeys.length === 0) {
@@ -85,19 +87,19 @@ export default class InfoboxPlugin extends Plugin {
 				if (typeof content[key] === "string") {
 					const subKey = document.createElement("p");
 					subKey.textContent = this.snakeCaseToNormal(key);
-					subKey.style.fontWeight = "700";
+					subKey.classList.add("title");
 					subDiv.appendChild(subKey);
 
 					const subContnet = document.createElement("p");
 					subContnet.textContent = content[key];
-					subContnet.style.width = "50%";
+					subContnet.classList.add("content");
 					subDiv.appendChild(subContnet);
 				} else if (Array.isArray(content[key])) {
 					let list: string[] = content[key];
 
 					const subKey = document.createElement("p");
 					subKey.textContent = this.snakeCaseToNormal(key);
-					subKey.style.fontWeight = "700";
+					subKey.classList.add("title");
 					subDiv.appendChild(subKey);
 
 					const listDiv = document.createElement("div");
@@ -113,14 +115,20 @@ export default class InfoboxPlugin extends Plugin {
 					if ("link" in content[key]) {
 						const subKey = document.createElement("p");
 						subKey.textContent = this.snakeCaseToNormal(key);
-						subKey.style.fontWeight = "700";
+						subKey.classList.add("title");
 						subDiv.appendChild(subKey);
 
 						const subContnet = document.createElement("a");
 						subContnet.textContent = content[key].content;
-						let url = this.parseUrl(content[key].link);
-						subContnet.href = url;
-						subContnet.style.width = "50%";
+						let url = this.parseUrl(
+							content[key].link,
+							ctx.sourcePath
+						);
+						subContnet.href = url.url;
+						if (url.type === "internal") {
+							subContnet.addClass("internal-link");
+						}
+						subContnet.classList.add("content");
 						subDiv.appendChild(subContnet);
 					}
 				}
@@ -130,31 +138,20 @@ export default class InfoboxPlugin extends Plugin {
 		return div;
 	}
 
-	parseUrl(link: string): string {
+	parseUrl(link: string, sourcePath: string): parsedUrl {
 		if (!/\[\[(.*?)(\|(.*?))?\]\]/.test(link)) {
-			return link;
+			let parsedurl: parsedUrl = { type: "external", url: link };
+			return parsedurl;
 		}
 
-		let matches = link.match(/\[\[(.*?)(\|(.*?))?\]\]/);
-		let noteName = matches![1];
+		let linkpath = link.slice(2, -2);
 
-		if (noteName.indexOf("/") === -1) {
-			let files = this.app.vault.getMarkdownFiles();
+		let file = this.app.metadataCache.getFirstLinkpathDest(
+			linkpath,
+			sourcePath
+		);
 
-			for (let file of files) {
-				if (file.basename === noteName) {
-					noteName = file.path.replace(new RegExp("/", "g"), "%2F");
-					break;
-				}
-			}
-		} else {
-			noteName = noteName.replace(new RegExp("/", "g"), "%2F");
-		}
-
-		noteName = noteName.replace(new RegExp(" ", "g"), "%20");
-
-		let vaultName = this.app.vault.getName();
-
-		return `obsidian://open?vault=${vaultName}&file=${noteName}`;
+		let parsedurl: parsedUrl = { type: "internal", url: file!.path };
+		return parsedurl;
 	}
 }

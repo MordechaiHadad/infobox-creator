@@ -58,6 +58,14 @@ If your plugin does not need CSS, delete this file.
 	justify-content: space-between;
 }
 
+.title {
+	font-weight: 700;
+}
+
+.content {
+	width: 50%;
+}
+
 .subdiv p,
 .subdiv a {
 	font-size: 1rem;
