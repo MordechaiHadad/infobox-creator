@@ -1,5 +1,5 @@
-import { Plugin, MarkdownPostProcessorContext, MetadataCache } from "obsidian";
-import { parse } from "@iarna/toml";
+import { Plugin, MarkdownPostProcessorContext } from "obsidian";
+import { JsonMap, parse } from "@iarna/toml";
 
 interface parsedUrl {
 	type: "internal" | "external";
@@ -19,7 +19,7 @@ export default class InfoboxPlugin extends Plugin {
 		console.log("Unloading infobox-creator, bye bye!");
 	}
 
-	async processInfoboxes(
+	processInfoboxes(
 		source: string,
 		el: HTMLElement,
 		ctx: MarkdownPostProcessorContext
@@ -43,7 +43,7 @@ export default class InfoboxPlugin extends Plugin {
 		);
 	}
 
-	parseInfoboxContent(content: string) {
+	parseInfoboxContent(content: string): JsonMap {
 		return parse(content);
 	}
 
