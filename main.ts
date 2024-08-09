@@ -51,15 +51,25 @@ export default class InfoboxPlugin extends Plugin {
 		const div = document.createElement("div");
 		div.classList.add("infobox");
 
-		if (content.image !== undefined) {
+		if (content.image) {
 			const img = document.createElement("img");
 			img.src = content.image;
 			div.appendChild(img);
 		}
 
-		if (content.title !== undefined) {
+		if (content.title) {
 			const title = document.createElement("h1");
 			title.textContent = content.title;
+			div.appendChild(title);
+		} else if (!content.title && Object.keys(content).length > 0) {
+			const filePath = ctx.sourcePath;
+			const noteName = filePath.substring(
+				filePath.lastIndexOf("/") + 1,
+				filePath.lastIndexOf(".")
+			);
+
+			const title = document.createElement("h1");
+			title.textContent = noteName;
 			div.appendChild(title);
 		}
 
