@@ -86,7 +86,6 @@ export default class InfoboxPlugin extends Plugin {
 
 				if (typeof content[key] === "string") {
 					const subKey = document.createElement("p");
-					console.log(key);
 					subKey.textContent = this.snakeCaseToNormal(key);
 					subKey.classList.add("title");
 					subDiv.appendChild(subKey);
@@ -102,7 +101,6 @@ export default class InfoboxPlugin extends Plugin {
 					let textBuffer = "";
 
 					parts.forEach((part: string, index: number) => {
-						console.log(part, interalLinkRegex.test(part));
 						if (interalLinkRegex.test(part)) {
 							// Append buffered text as a single text node
 							if (textBuffer) {
@@ -196,12 +194,25 @@ export default class InfoboxPlugin extends Plugin {
 		ctx: MarkdownPostProcessorContext
 	): HTMLAnchorElement {
 		const element = document.createElement("a");
-		element.textContent = url.replace(/\[|\]/g, "");
 
-		let parsedUrl = this.parseUrl(url, ctx.sourcePath);
-		element.href = parsedUrl.url;
-		if (parsedUrl.type === "internal") {
-			element.addClass("internal-link");
+		const linkPattern = /\[\[(.*?)(?:\|(.*?))?\]\]/;
+		const match = url.match(linkPattern);
+
+		if (match) {
+			const link = match[1]; // The actual link
+			const name = match[2] || link; // The name or the link if name is not provided
+
+			element.textContent = name;
+
+			let parsedUrl = this.parseUrl(link, ctx.sourcePath);
+			element.href = parsedUrl.url;
+			if (parsedUrl.type === "internal") {
+				element.classList.add("internal-link");
+			}
+		} else {
+			// Fallback in case the regex does not match
+			element.textContent = url.replace(/\[|\]/g, "");
+			element.href = this.parseUrl(url, ctx.sourcePath).url;
 		}
 
 		return element;
