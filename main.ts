@@ -29,16 +29,12 @@ export default class InfoboxPlugin extends Plugin {
 		el.replaceWith(infoboxElement);
 	}
 
-	snakeCaseToNormal(content: string) {
+	snakeCaseToNormal(content: string): string {
 		return (
 			content
-				// Replace underscore with a space
-				.replace("_", " ")
-				// Split the string into an array of words
+				.replace(/_/g, " ")
 				.split(" ")
-				// Map over the array and capitalize the first letter of each word
 				.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-				// Join the array back to a string
 				.join(" ")
 		);
 	}
