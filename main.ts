@@ -86,12 +86,54 @@ export default class InfoboxPlugin extends Plugin {
 
 				if (typeof content[key] === "string") {
 					const subKey = document.createElement("p");
+					console.log(key);
 					subKey.textContent = this.snakeCaseToNormal(key);
 					subKey.classList.add("title");
 					subDiv.appendChild(subKey);
 
 					const subContnet = document.createElement("p");
-					subContnet.textContent = content[key];
+					let contentString = content[key];
+
+					const interalLinkRegex = /\[\[.*?\]\]/; // Regex pattern to match [[Some String]]
+
+					const parts = contentString
+						.split(/(\[\[.*?\]\])| /)
+						.filter(Boolean);
+					let textBuffer = "";
+
+					parts.forEach((part: string, index: number) => {
+						console.log(part, interalLinkRegex.test(part));
+						if (interalLinkRegex.test(part)) {
+							// Append buffered text as a single text node
+							if (textBuffer) {
+								const textNode = document.createTextNode(
+									textBuffer + " "
+								);
+								subContnet.appendChild(textNode);
+								textBuffer = "";
+							}
+							// Append the anchor element
+							const matchElement = this.generateAElementFromUrl(
+								part,
+								ctx
+							);
+							subContnet.appendChild(matchElement);
+							subContnet.appendChild(
+								document.createTextNode(" ")
+							);
+						} else {
+							// Accumulate text parts in the buffer
+							textBuffer += part + " ";
+						}
+
+						// If it's the last part, append any remaining text in the buffer
+						if (index === parts.length - 1 && textBuffer) {
+							const textNode =
+								document.createTextNode(textBuffer);
+							subContnet.appendChild(textNode);
+						}
+					});
+
 					subContnet.classList.add("content");
 					subDiv.appendChild(subContnet);
 				} else if (Array.isArray(content[key])) {
@@ -118,16 +160,10 @@ export default class InfoboxPlugin extends Plugin {
 						subKey.classList.add("title");
 						subDiv.appendChild(subKey);
 
-						const subContnet = document.createElement("a");
-						subContnet.textContent = content[key].content;
-						let url = this.parseUrl(
-							content[key].link,
-							ctx.sourcePath
+						const subContnet = this.generateAElementFromUrl(
+							content[key].content,
+							ctx
 						);
-						subContnet.href = url.url;
-						if (url.type === "internal") {
-							subContnet.addClass("internal-link");
-						}
 						subContnet.classList.add("content");
 						subDiv.appendChild(subContnet);
 					}
@@ -153,5 +189,21 @@ export default class InfoboxPlugin extends Plugin {
 
 		let parsedurl: parsedUrl = { type: "internal", url: file!.path };
 		return parsedurl;
+	}
+
+	generateAElementFromUrl(
+		url: string,
+		ctx: MarkdownPostProcessorContext
+	): HTMLAnchorElement {
+		const element = document.createElement("a");
+		element.textContent = url.replace(/\[|\]/g, "");
+
+		let parsedUrl = this.parseUrl(url, ctx.sourcePath);
+		element.href = parsedUrl.url;
+		if (parsedUrl.type === "internal") {
+			element.addClass("internal-link");
+		}
+
+		return element;
 	}
 }
