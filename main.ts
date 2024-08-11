@@ -1,4 +1,4 @@
-import { Plugin, MarkdownPostProcessorContext } from "obsidian";
+import { Plugin, MarkdownPostProcessorContext, TFile } from "obsidian";
 import { JsonMap, parse } from "@iarna/toml";
 
 interface parsedUrl {
@@ -11,7 +11,7 @@ export default class InfoboxPlugin extends Plugin {
 		console.log("Loading infobox-creator");
 		this.registerMarkdownCodeBlockProcessor(
 			"infobox",
-			this.processInfoboxes.bind(this),
+			this.processInfoboxes.bind(this)
 		);
 	}
 
@@ -22,7 +22,7 @@ export default class InfoboxPlugin extends Plugin {
 	processInfoboxes(
 		source: string,
 		el: HTMLElement,
-		ctx: MarkdownPostProcessorContext,
+		ctx: MarkdownPostProcessorContext
 	) {
 		const infoboxContent = this.parseInfoboxContent(source);
 		const infoboxElement = this.createInfoboxElement(infoboxContent, ctx);
@@ -42,6 +42,7 @@ export default class InfoboxPlugin extends Plugin {
 	}
 
 	createInfoboxElement(content: any, ctx: MarkdownPostProcessorContext) {
+		const file = this.getFileFromContext(ctx);
 		const div = document.createElement("div");
 		div.classList.add("infobox");
 
@@ -59,7 +60,7 @@ export default class InfoboxPlugin extends Plugin {
 			const filePath = ctx.sourcePath;
 			const noteName = filePath.substring(
 				filePath.lastIndexOf("/") + 1,
-				filePath.lastIndexOf("."),
+				filePath.lastIndexOf(".")
 			);
 
 			const title = document.createElement("h1");
@@ -68,7 +69,7 @@ export default class InfoboxPlugin extends Plugin {
 		}
 
 		let remainingKeys = Object.keys(content).filter(
-			(key) => key !== "image" && key !== "title",
+			(key) => key !== "image" && key !== "title"
 		);
 
 		if (remainingKeys.length === 0) {
@@ -97,7 +98,7 @@ export default class InfoboxPlugin extends Plugin {
 					const subContnet = document.createElement("p");
 					let contentString = content[key];
 
-					const interalLinkRegex = /\[\[.*?\]\]/; // Regex pattern to match [[Some String]]
+					const interalLinkRegex = /\[\[.*?\]\]/;
 
 					const parts = contentString
 						.split(/(\[\[.*?\]\])| /)
@@ -109,7 +110,7 @@ export default class InfoboxPlugin extends Plugin {
 							// Append buffered text as a single text node
 							if (textBuffer) {
 								const textNode = document.createTextNode(
-									textBuffer + " ",
+									textBuffer + " "
 								);
 								subContnet.appendChild(textNode);
 								textBuffer = "";
@@ -117,12 +118,13 @@ export default class InfoboxPlugin extends Plugin {
 							// Append the anchor element
 							const matchElement = this.generateAElementFromUrl(
 								part,
-								ctx,
+								ctx
 							);
 							subContnet.appendChild(matchElement);
 							subContnet.appendChild(
-								document.createTextNode(" "),
+								document.createTextNode(" ")
 							);
+							// this.ensureLinkIsRegistered(file!, part);
 						} else {
 							// Accumulate text parts in the buffer
 							textBuffer += part + " ";
@@ -163,7 +165,7 @@ export default class InfoboxPlugin extends Plugin {
 
 						const subContnet = this.generateAElementFromUrl(
 							content[key].content,
-							ctx,
+							ctx
 						);
 						fieldDiv.appendChild(subContnet);
 					}
@@ -174,43 +176,56 @@ export default class InfoboxPlugin extends Plugin {
 		return div;
 	}
 
-	parseUrl(link: string, sourcePath: string): parsedUrl {
-		if (!/\[\[(.*?)(\|(.*?))?\]\]/.test(link)) {
-			let parsedurl: parsedUrl = { type: "external", url: link };
+	parseUrl(url: string, sourcePath: string): parsedUrl {
+		const internalLinkRegex = /\[\[(.*?)(?:#(.*?))?(?:\|(.*?))?\]\]/;
+
+		if (!internalLinkRegex.test(url)) {
+			let parsedurl: parsedUrl = { type: "external", url: url };
 			return parsedurl;
 		}
 
-		let linkpath = link.slice(2, -2);
+		const match = url.match(internalLinkRegex);
+		const noteName = match![1];
+		const noteHeader = match![2];
 
 		let file = this.app.metadataCache.getFirstLinkpathDest(
-			linkpath,
-			sourcePath,
+			noteName,
+			sourcePath
 		);
 
-		let parsedurl: parsedUrl = { type: "internal", url: file!.path };
+
+		const newUrl = `${file!.path}${noteHeader ? `#${noteHeader}` : ""}`;
+		let parsedurl: parsedUrl = {
+			type: "internal",
+			url: newUrl,
+		};
 		return parsedurl;
 	}
 
 	generateAElementFromUrl(
 		url: string,
-		ctx: MarkdownPostProcessorContext,
+		ctx: MarkdownPostProcessorContext
 	): HTMLAnchorElement {
 		const element = document.createElement("a");
 
-		const linkPattern = /\[\[(.*?)(?:\|(.*?))?\]\]/;
+		const linkPattern = /\[\[(.*?)(?:#(.*?))?(?:\|(.*?))?\]\]/;
 		const match = url.match(linkPattern);
 
 		if (match) {
 			const link = match[1]; // The actual link
-			const name = match[2] || link; // The name or the link if name is not provided
+			const header = match[2];
+			const name = match[3] || `${link}${header ? `#${header}` : ""}`;
+
+			const reconstructedUrl = `[[${link}${
+				header ? `#${header}]]` : "]]"
+			}`;
 
 			element.textContent = name;
 
-			let parsedUrl = this.parseUrl(link, ctx.sourcePath);
+			let parsedUrl = this.parseUrl(reconstructedUrl, ctx.sourcePath);
 			element.href = parsedUrl.url;
-			if (parsedUrl.type === "internal") {
+			if (parsedUrl.type === "internal")
 				element.classList.add("internal-link");
-			}
 		} else {
 			// Fallback in case the regex does not match
 			element.textContent = url.replace(/\[|\]/g, "");
@@ -219,4 +234,23 @@ export default class InfoboxPlugin extends Plugin {
 
 		return element;
 	}
+
+	getFileFromContext(ctx: MarkdownPostProcessorContext): TFile | null {
+		const filePath = ctx.sourcePath;
+		return this.app.metadataCache.getFirstLinkpathDest(filePath, "");
+	}
+
+	// ensureLinkIsRegistered(file: TFile, linkedNote: string) {
+	// 	const existingFile = this.app.metadataCache.getFirstLinkpathDest(
+	// 		linkedNote,
+	// 		file.path
+	// 	);
+
+	// 	if (existingFile) {
+	// 		// Manually update the metadata cache
+	// 		this.app.metadataCache.trigger("changed", file);
+	// 	} else {
+	// 		console.log(`Linked note "${linkedNote}" not found.`);
+	// 	}
+	// }
 }
