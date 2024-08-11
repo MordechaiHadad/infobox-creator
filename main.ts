@@ -11,7 +11,7 @@ export default class InfoboxPlugin extends Plugin {
 		console.log("Loading infobox-creator");
 		this.registerMarkdownCodeBlockProcessor(
 			"infobox",
-			this.processInfoboxes.bind(this)
+			this.processInfoboxes.bind(this),
 		);
 	}
 
@@ -22,7 +22,7 @@ export default class InfoboxPlugin extends Plugin {
 	processInfoboxes(
 		source: string,
 		el: HTMLElement,
-		ctx: MarkdownPostProcessorContext
+		ctx: MarkdownPostProcessorContext,
 	) {
 		const infoboxContent = this.parseInfoboxContent(source);
 		const infoboxElement = this.createInfoboxElement(infoboxContent, ctx);
@@ -60,7 +60,7 @@ export default class InfoboxPlugin extends Plugin {
 			const filePath = ctx.sourcePath;
 			const noteName = filePath.substring(
 				filePath.lastIndexOf("/") + 1,
-				filePath.lastIndexOf(".")
+				filePath.lastIndexOf("."),
 			);
 
 			const title = document.createElement("h1");
@@ -69,7 +69,7 @@ export default class InfoboxPlugin extends Plugin {
 		}
 
 		let remainingKeys = Object.keys(content).filter(
-			(key) => key !== "image" && key !== "title"
+			(key) => key !== "image" && key !== "title",
 		);
 
 		if (remainingKeys.length === 0) {
@@ -110,7 +110,7 @@ export default class InfoboxPlugin extends Plugin {
 							// Append buffered text as a single text node
 							if (textBuffer) {
 								const textNode = document.createTextNode(
-									textBuffer + " "
+									textBuffer + " ",
 								);
 								subContnet.appendChild(textNode);
 								textBuffer = "";
@@ -118,11 +118,11 @@ export default class InfoboxPlugin extends Plugin {
 							// Append the anchor element
 							const matchElement = this.generateAElementFromUrl(
 								part,
-								ctx
+								ctx,
 							);
 							subContnet.appendChild(matchElement);
 							subContnet.appendChild(
-								document.createTextNode(" ")
+								document.createTextNode(" "),
 							);
 							// this.ensureLinkIsRegistered(file!, part);
 						} else {
@@ -165,7 +165,7 @@ export default class InfoboxPlugin extends Plugin {
 
 						const subContnet = this.generateAElementFromUrl(
 							content[key].content,
-							ctx
+							ctx,
 						);
 						fieldDiv.appendChild(subContnet);
 					}
@@ -190,9 +190,8 @@ export default class InfoboxPlugin extends Plugin {
 
 		let file = this.app.metadataCache.getFirstLinkpathDest(
 			noteName,
-			sourcePath
+			sourcePath,
 		);
-
 
 		const newUrl = `${file!.path}${noteHeader ? `#${noteHeader}` : ""}`;
 		let parsedurl: parsedUrl = {
@@ -204,7 +203,7 @@ export default class InfoboxPlugin extends Plugin {
 
 	generateAElementFromUrl(
 		url: string,
-		ctx: MarkdownPostProcessorContext
+		ctx: MarkdownPostProcessorContext,
 	): HTMLAnchorElement {
 		const element = document.createElement("a");
 
