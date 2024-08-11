@@ -86,15 +86,15 @@ export default class InfoboxPlugin extends Plugin {
 
 			// Make sure this is a property of the object, not something from the prototype chain
 			if (content.hasOwnProperty(key)) {
-				const subDiv = document.createElement("div");
-				subDiv.classList.add("subdiv");
-				infoboxContent.appendChild(subDiv);
+				const fieldDiv = document.createElement("div");
+				fieldDiv.classList.add("field-div");
+				infoboxContent.appendChild(fieldDiv);
 
 				if (typeof content[key] === "string") {
 					const subKey = document.createElement("p");
 					subKey.textContent = this.snakeCaseToNormal(key);
 					subKey.classList.add("title");
-					subDiv.appendChild(subKey);
+					fieldDiv.appendChild(subKey);
 
 					const subContnet = document.createElement("p");
 					let contentString = content[key];
@@ -138,19 +138,18 @@ export default class InfoboxPlugin extends Plugin {
 						}
 					});
 
-					subContnet.classList.add("content");
-					subDiv.appendChild(subContnet);
+					fieldDiv.appendChild(subContnet);
 				} else if (Array.isArray(content[key])) {
 					let list: string[] = content[key];
 
 					const subKey = document.createElement("p");
 					subKey.textContent = this.snakeCaseToNormal(key);
 					subKey.classList.add("title");
-					subDiv.appendChild(subKey);
+					fieldDiv.appendChild(subKey);
 
 					const listDiv = document.createElement("div");
 					listDiv.classList.add("listdiv");
-					subDiv.appendChild(listDiv);
+					fieldDiv.appendChild(listDiv);
 
 					list.forEach((element) => {
 						const subContnet = document.createElement("p");
@@ -162,14 +161,13 @@ export default class InfoboxPlugin extends Plugin {
 						const subKey = document.createElement("p");
 						subKey.textContent = this.snakeCaseToNormal(key);
 						subKey.classList.add("title");
-						subDiv.appendChild(subKey);
+						fieldDiv.appendChild(subKey);
 
 						const subContnet = this.generateAElementFromUrl(
 							content[key].content,
 							ctx
 						);
-						subContnet.classList.add("content");
-						subDiv.appendChild(subContnet);
+						fieldDiv.appendChild(subContnet);
 					}
 				}
 			}
