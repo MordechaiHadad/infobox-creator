@@ -124,7 +124,6 @@ export default class InfoboxPlugin extends Plugin {
 							subContnet.appendChild(
 								document.createTextNode(" ")
 							);
-							// this.ensureLinkIsRegistered(file!, part);
 						} else {
 							// Accumulate text parts in the buffer
 							textBuffer += part + " ";
@@ -193,6 +192,10 @@ export default class InfoboxPlugin extends Plugin {
 			sourcePath
 		);
 
+		if (!file) {
+			let parsedurl: parsedUrl = { type: "external", url: url };
+			return parsedurl;
+		}
 
 		const newUrl = `${file!.path}${noteHeader ? `#${noteHeader}` : ""}`;
 		let parsedurl: parsedUrl = {
@@ -239,18 +242,4 @@ export default class InfoboxPlugin extends Plugin {
 		const filePath = ctx.sourcePath;
 		return this.app.metadataCache.getFirstLinkpathDest(filePath, "");
 	}
-
-	// ensureLinkIsRegistered(file: TFile, linkedNote: string) {
-	// 	const existingFile = this.app.metadataCache.getFirstLinkpathDest(
-	// 		linkedNote,
-	// 		file.path
-	// 	);
-
-	// 	if (existingFile) {
-	// 		// Manually update the metadata cache
-	// 		this.app.metadataCache.trigger("changed", file);
-	// 	} else {
-	// 		console.log(`Linked note "${linkedNote}" not found.`);
-	// 	}
-	// }
 }
