@@ -137,6 +137,7 @@ export default class InfoboxPlugin extends Plugin {
 						}
 					});
 
+					subContnet.classList.add("field-content");
 					fieldDiv.appendChild(subContnet);
 				} else if (Array.isArray(content[key])) {
 					let list: string[] = content[key];

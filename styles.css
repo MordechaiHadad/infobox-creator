@@ -65,6 +65,10 @@ If your plugin does not need CSS, delete this file.
 	width: 100%;
 }
 
+.field-content {
+	text-align: end;
+}
+
 .field-div p,
 .field-div a {
 	font-size: 1rem;
