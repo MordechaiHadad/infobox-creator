@@ -41,20 +41,23 @@ export default class InfoboxPlugin extends Plugin {
 		return parse(content);
 	}
 
-	createInfoboxElement(content: any, ctx: MarkdownPostProcessorContext) {
-		const file = this.getFileFromContext(ctx);
+	createInfoboxElement(content: JsonMap, ctx: MarkdownPostProcessorContext) {
 		const div = document.createElement("div");
 		div.classList.add("infobox");
 
-		if (content.image) {
+		const keys = Object.keys(content);
+		const imageKey = keys.find((key) => key.toLowerCase() === "image");
+		const titleKey = keys.find((key) => key.toLowerCase() === "title");
+
+		if (imageKey && typeof content[imageKey] === "string") {
 			const img = document.createElement("img");
-			img.src = content.image;
+			img.src = content[imageKey] as string;
 			div.appendChild(img);
 		}
 
-		if (content.title) {
+		if (titleKey && typeof content[titleKey] === "string") {
 			const title = document.createElement("h1");
-			title.textContent = content.title;
+			title.textContent = content[titleKey] as string;
 			div.appendChild(title);
 		} else if (!content.title && Object.keys(content).length > 0) {
 			const filePath = ctx.sourcePath;
@@ -68,35 +71,35 @@ export default class InfoboxPlugin extends Plugin {
 			div.appendChild(title);
 		}
 
-		let remainingKeys = Object.keys(content).filter(
+		const remainingKeys = keys.filter(
 			(key) => key !== "image" && key !== "title"
 		);
 
-		if (remainingKeys.length === 0) {
-			return div;
-		}
+		if (remainingKeys.length === 0) return div;
 
 		const infoboxContent = document.createElement("div");
 		infoboxContent.classList.add("infobox-content");
 		div.appendChild(infoboxContent);
 		for (const key in content) {
 			// Skip if the property is 'img' or 'title'
-			if (key === "image" || key === "title") continue;
+			if (key === imageKey || key === titleKey) continue;
 
 			// Make sure this is a property of the object, not something from the prototype chain
 			if (content.hasOwnProperty(key)) {
+				const value = content[key];
+
 				const fieldDiv = document.createElement("div");
 				fieldDiv.classList.add("field-div");
 				infoboxContent.appendChild(fieldDiv);
 
-				if (typeof content[key] === "string") {
-					const subKey = document.createElement("p");
-					subKey.textContent = this.snakeCaseToNormal(key);
-					subKey.classList.add("title");
-					fieldDiv.appendChild(subKey);
+				const subKey = document.createElement("p");
+				subKey.textContent = this.snakeCaseToNormal(key);
+				subKey.classList.add("title");
+				fieldDiv.appendChild(subKey);
 
+				if (typeof value === "string") {
 					const subContnet = document.createElement("p");
-					let contentString = content[key];
+					const contentString = value;
 
 					const interalLinkRegex = /\[\[.*?\]\]/;
 
@@ -139,8 +142,8 @@ export default class InfoboxPlugin extends Plugin {
 
 					subContnet.classList.add("field-content");
 					fieldDiv.appendChild(subContnet);
-				} else if (Array.isArray(content[key])) {
-					let list: string[] = content[key];
+				} else if (Array.isArray(value)) {
+					const list: unknown[] = value;
 
 					const subKey = document.createElement("p");
 					subKey.textContent = this.snakeCaseToNormal(key);
@@ -152,22 +155,31 @@ export default class InfoboxPlugin extends Plugin {
 					fieldDiv.appendChild(listDiv);
 
 					list.forEach((element) => {
+						if (typeof element !== "string") return;
 						const subContnet = document.createElement("p");
 						subContnet.textContent = element;
 						listDiv.appendChild(subContnet);
 					});
-				} else if (typeof content[key] == "object") {
-					if ("link" in content[key]) {
-						const subKey = document.createElement("p");
-						subKey.textContent = this.snakeCaseToNormal(key);
-						subKey.classList.add("title");
-						fieldDiv.appendChild(subKey);
-
-						const subContnet = this.generateAElementFromUrl(
-							content[key].content,
+				} else if (
+					typeof value === "object" &&
+					value !== null &&
+					"link" in value &&
+					"content" in value
+				) {
+					const linkData = value as {
+						link: unknown;
+						content: unknown;
+					};
+					if (
+						typeof linkData.content === "string" &&
+						typeof linkData.link === "string"
+					) {
+						const subContent = this.generateAElementFromUrl(
+							linkData.link,
 							ctx
 						);
-						fieldDiv.appendChild(subContnet);
+						subContent.textContent = linkData.content;
+						fieldDiv.appendChild(subContent);
 					}
 				}
 			}
@@ -178,28 +190,28 @@ export default class InfoboxPlugin extends Plugin {
 
 	parseUrl(url: string, sourcePath: string): parsedUrl {
 		const internalLinkRegex = /\[\[(.*?)(?:#(.*?))?(?:\|(.*?))?\]\]/;
+		const match = url.match(internalLinkRegex);
 
-		if (!internalLinkRegex.test(url)) {
-			let parsedurl: parsedUrl = { type: "external", url: url };
+		if (!match) {
+			const parsedurl: parsedUrl = { type: "external", url: url };
 			return parsedurl;
 		}
 
-		const match = url.match(internalLinkRegex);
-		const noteName = match![1];
-		const noteHeader = match![2];
+		const noteName = match[1];
+		const noteHeader = match[2];
 
-		let file = this.app.metadataCache.getFirstLinkpathDest(
+		const file = this.app.metadataCache.getFirstLinkpathDest(
 			noteName,
 			sourcePath
 		);
 
 		if (!file) {
-			let parsedurl: parsedUrl = { type: "external", url: url };
+			const parsedurl: parsedUrl = { type: "external", url: url };
 			return parsedurl;
 		}
 
-		const newUrl = `${file!.path}${noteHeader ? `#${noteHeader}` : ""}`;
-		let parsedurl: parsedUrl = {
+		const newUrl = `${file.path}${noteHeader ? `#${noteHeader}` : ""}`;
+		const parsedurl: parsedUrl = {
 			type: "internal",
 			url: newUrl,
 		};
@@ -226,7 +238,7 @@ export default class InfoboxPlugin extends Plugin {
 
 			element.textContent = name;
 
-			let parsedUrl = this.parseUrl(reconstructedUrl, ctx.sourcePath);
+			const parsedUrl = this.parseUrl(reconstructedUrl, ctx.sourcePath);
 			element.href = parsedUrl.url;
 			if (parsedUrl.type === "internal")
 				element.classList.add("internal-link");
