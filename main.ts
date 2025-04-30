@@ -49,11 +49,38 @@ export default class InfoboxPlugin extends Plugin {
 		const imageKey = keys.find((key) => key.toLowerCase() === "image");
 		const titleKey = keys.find((key) => key.toLowerCase() === "title");
 
-		if (imageKey && typeof content[imageKey] === "string") {
-			const img = document.createElement("img");
-			img.src = content[imageKey] as string;
-			div.appendChild(img);
-		}
+        if (imageKey && typeof content[imageKey] === "string") {
+            const imageValue = content[imageKey] as string;
+            const internalLinkMatch = imageValue.match(/\[\[(.*?)\]\]/); // Check for [[...]]
+
+            let imageSrc: string | null = null;
+
+            if (internalLinkMatch) {
+                // It's an internal link
+                const imageName = internalLinkMatch[1]; // Extract filename/path
+                const imageFile = this.app.metadataCache.getFirstLinkpathDest(
+                    imageName,
+                    ctx.sourcePath // Provide context path for resolution
+                );
+
+                if (imageFile instanceof TFile) { // Check if it's a file
+                    // Get a usable URL for the image file
+                    imageSrc = this.app.vault.adapter.getResourcePath(imageFile.path);
+                } else {
+                    console.warn(`Infobox: Could not find image file "${imageName}"`);
+                }
+            } else {
+                // Assume it's a regular URL
+                imageSrc = imageValue;
+            }
+
+            // Create and append the image element if a valid src was found
+            if (imageSrc) {
+                const img = document.createElement("img");
+                img.src = imageSrc;
+                div.appendChild(img);
+            }
+        }
 
 		if (titleKey && typeof content[titleKey] === "string") {
 			const title = document.createElement("h1");
