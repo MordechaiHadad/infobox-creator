@@ -51,6 +51,7 @@ If your plugin does not need CSS, delete this file.
     flex-wrap: wrap;
     gap: 1.5rem;
     padding: 0.75rem;
+	width: 100%;
     justify-content: space-between;
 }
 
