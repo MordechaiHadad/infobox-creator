@@ -1,4 +1,4 @@
-import esbuild from "npm:esbuild@0.17.3";
+import esbuild from "npm:esbuild@0.25.2";
 
 const banner = `if(typeof global==="undefined"){window.global=window}
 /*
