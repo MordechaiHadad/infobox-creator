@@ -15,6 +15,9 @@ main.js
 # Exclude sourcemaps
 *.map
 
+# deno
+deno.lock
+
 # obsidian
 data.json
 

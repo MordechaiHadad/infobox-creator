@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "inlineSourceMap": true,
     "inlineSources": true,
     "module": "ESNext",
@@ -20,5 +19,9 @@
   },
   "include": [
     "**/*.ts"
+  ],
+  "exclude": [
+    "build.ts",
+    "version-bump.ts"
   ]
 }
