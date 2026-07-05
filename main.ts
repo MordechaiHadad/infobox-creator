@@ -1,5 +1,5 @@
 import { Plugin, MarkdownPostProcessorContext, TFile } from "obsidian";
-import { JsonMap, parse } from "@iarna/toml";
+import { parse } from "smol-toml";
 
 interface parsedUrl {
 	type: "internal" | "external";
@@ -37,11 +37,11 @@ export default class InfoboxPlugin extends Plugin {
 			.join(" ");
 	}
 
-	parseInfoboxContent(content: string): JsonMap {
+	parseInfoboxContent(content: string): Record<string, unknown> {
 		return parse(content);
 	}
 
-	createInfoboxElement(content: JsonMap, ctx: MarkdownPostProcessorContext) {
+	createInfoboxElement(content: Record<string, unknown>, ctx: MarkdownPostProcessorContext) {
 		const div = document.createElement("div");
 		div.classList.add("infobox");
 

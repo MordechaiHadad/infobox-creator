@@ -9,7 +9,6 @@ const args = [
   "--external:@lezer/common", "--external:@lezer/highlight", "--external:@lezer/lr",
   "--format=cjs", "--target=es2018",
   "--tree-shaking=true", "--outfile=main.js",
-  "--banner:js=if(typeof global==='undefined'){window.global=window}",
 ];
 if (Deno.args[0] !== "production") args.push("--sourcemap=inline");
 const { code } = await new Deno.Command("deno", { args, stdout: "inherit", stderr: "inherit" }).output();
