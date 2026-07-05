@@ -27,11 +27,11 @@ jobs:
       - name: Build
         run: deno run -A build.ts production
 
+      - name: Package
+        run: zip infobox.zip main.js manifest.json styles.css
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           prerelease: false
-          files: |
-            main.js
-            manifest.json
-            styles.css
+          files: infobox.zip
